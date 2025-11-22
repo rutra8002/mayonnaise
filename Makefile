@@ -5,9 +5,9 @@ LD = ld
 SRC_DIR = src
 BUILD_DIR = build
 BOOT_SRC = $(SRC_DIR)/boot.asm
-KERNEL_SRC = $(SRC_DIR)/kernel.c
+C_SOURCES = $(wildcard $(SRC_DIR)/*.c)
 BOOT_BIN = $(BUILD_DIR)/boot.bin
-KERNEL_OBJ = $(BUILD_DIR)/kernel.o
+KERNEL_OBJS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(C_SOURCES))
 KERNEL_BIN = $(BUILD_DIR)/kernel.bin
 OS_IMAGE = $(BUILD_DIR)/os-image.bin
 OS_ISO = $(BUILD_DIR)/os-image.iso
@@ -33,10 +33,10 @@ $(OS_IMAGE): $(BOOT_BIN) $(KERNEL_BIN)
 $(BOOT_BIN): $(BOOT_SRC) | $(BUILD_DIR)
 	$(ASM) -f bin $< -o $@
 
-$(KERNEL_BIN): $(KERNEL_OBJ)
-	$(LD) $(LDFLAGS) -o $@ $<
+$(KERNEL_BIN): $(KERNEL_OBJS)
+	$(LD) $(LDFLAGS) -o $@ $^
 
-$(KERNEL_OBJ): $(KERNEL_SRC) | $(BUILD_DIR)
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $< -o $@
 
 $(BUILD_DIR):
